@@ -1,0 +1,10 @@
+menu "Board Properties"
+    config OTA_ENABLED
+        bool "Ota enabled"
+
+    config MQTT_ENABLED
+        bool "Mqtt enabled"
+
+    config TCP_ENABLED
+        bool "Tcp enabled"
+endmenu
