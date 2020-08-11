@@ -49,10 +49,14 @@ def boardChoiceMenu(boards_dict):
     return (vendor_name, board)
 
 
-def selectLibraries(vendor_name, board):
+def setLibraryDefaults(vendor_name, board):
     board_default_properties = "../vendors/" + vendor_name + "/" + board + "/KConfig"
 
     subprocess.run(["py","merge_config.py", "KConfig", ".config", board_default_properties])
+
+
+def enableLibraries():
+    subprocess.run(["guiconfig"])
 
 
 def getOutputDirectory():
@@ -64,17 +68,20 @@ def getOutputDirectory():
 def cloneFreeRTOSRepository(output_dir_name):
     print("\n-----Cloning FreeRTOS Repository-----\n")
     sys.stdout.flush()
-    # change directories 
+
+    # change directories so that the freertos repo is cloned outside the scope of this repo
     os.chdir("../..")
     subprocess.run(["git", "clone", "https://github.com/ethan-tucker/amazon-freertos.git", "--recurse-submodules", output_dir_name])
-    
+    os.chdir("sourceFetcher/source")
 
-def updateBoardChosen(vendor, board):
-    pass
+def updateBoardChosen(vendor, board, output_dir_name):
+    os.chdir("../../" + output_dir_name + "/amazon-freertos/tools/configuration")
+    with open("boardChoice.csv", "w") as board_chosen_file:
+        board_chosen_file.write(vendor + "," + board)
 
 
 def callConfigurationScript():
-    pass
+    subprocess.run(["py", "configure.py"])
 
 
 def main():
@@ -98,11 +105,16 @@ def main():
     board_chosen = boardChoiceMenu(boards_dict)
     vendor = board_chosen[0]
     board = board_chosen[1]
-    selectLibraries(vendor, board)
+    setLibraryDefaults(vendor, board)
+
+    enableLibraries()
 
     output_dir_name = getOutputDirectory()
+
     cloneFreeRTOSRepository(output_dir_name)
-    updateBoardChosen()
+
+    updateBoardChosen(vendor, board, output_dir_name)
+    
     callConfigurationScript()
 
 
