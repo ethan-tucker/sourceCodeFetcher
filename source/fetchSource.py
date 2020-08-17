@@ -5,7 +5,7 @@ import os
 import glob
 
 
-# This script is a porion of the configure.py located in the amazon-freertos/tools/configuration directory.
+# This script is a portion of the configure.py located in the amazon-freertos/tools/configuration directory.
 # It has been abstracted to allow users to disable/enable libraries before cloning the source code in the hopes
 # that this will allow their downloads to be smaller by not downloading libararies that they don't need.
 
@@ -14,6 +14,7 @@ import glob
 #   1) a number
 #   2) within a valid range (based on the number of total options)
 # This is used by both the getBoardChoice function and the getVenderChoice function
+# retuns: the valid choice that the user made
 def getValidUserInput(options, max_acceptable_value, error_message):
     user_input = input("\n%s (by number): "%(error_message))
     # This loop will run until the user has entered a valid selection. At that point the function will return the name of the board chosen.
@@ -32,6 +33,7 @@ def getValidUserInput(options, max_acceptable_value, error_message):
 
 # getBoardChoice: Prints all of the possible boards options that the user can select from. It then calls
 # getValidUserInput to makes sure that they made a valid selection.
+# Returns: The board choice (name of the board) that the user chose
 def getBoardChoice(boards):
     print("\n-----CHOOSE A BOARD-----\n")
     
@@ -43,6 +45,7 @@ def getBoardChoice(boards):
 
 # getVendorChoice: This function prints all of the possible vendor options that the user can select from. It then calls
 # getValidUserInput to makes sure that they made a valid selection.
+# Returns: The vendor choice (name of the vendor) that the user chose
 def getVendorChoice(boards_dict):
     print("\n-----CHOOSE A VENDOR-----\n")
 
@@ -55,6 +58,7 @@ def getVendorChoice(boards_dict):
 
 
 # boardChoiceMenu: calls getVendorChoice followed by getBoardChoice and echos the user choice to the terminal
+# Returns: the vendor and board choice that the user made
 def boardChoiceMenu(boards_dict):
     vendor = getVendorChoice(boards_dict)
     vendor_name = vendor[0]
@@ -74,13 +78,15 @@ def setLibraryDefaults(vendor_name, board):
     subprocess.run(["py","merge_config.py", "KConfig", ".config", board_default_properties])
 
 
-# enableLibraries: Calls guiconfig which is what takes the Kconfig fill and presents the user with a GUI with the
+# enableLibraries: Calls guiconfig which is what takes the Kconfig file and presents the user with a GUI with the
 # possible configuration options
+# When guiconfig is done running it outputs the users configuration decisions to .config
 def enableLibraries():
     subprocess.run(["guiconfig"])
 
 
 # getOutputDirectory: Asks the user to name the directory that the FreeRTOS source code will end up cloning in to. 
+# Returns: The string they entered to be their "output_dir"
 def getOutputDirectory():
     print("\n-----Choosing output folder name-----\n")
     output_dir = input("What would you like the output folder to be called: ")
@@ -120,6 +126,7 @@ def updateBoardChosen(vendor, board, output_dir_name):
     subprocess.run(command)
     print()
     
+    # Opening the boardChoice.csv file to store the vendor and board choice the user made. This is how the configure.py script will know which option was chosen
     with open("boardChoice.csv", "w") as board_chosen_file:
         board_chosen_file.write(vendor + "," + board)
 
@@ -159,17 +166,22 @@ def main():
               ("ti", ["cc3220_launchpad"]), 
               ("xilinx", ["microzed"])])
 
+    # Get the users vendor and board choice
     board_chosen = boardChoiceMenu(boards_dict)
     vendor = board_chosen[0]
     board = board_chosen[1]
     setLibraryDefaults(vendor, board)
 
+    # Allow the users t0 enable/disable libraries
     enableLibraries()
 
+    # Get the users output directory for the FreeRTOS code to be cloned to
     output_dir_name = getOutputDirectory()
 
+    # Clone the FreeRTOS repository into the users chosen output_dir
     cloneFreeRTOSRepository(output_dir_name)
 
+    # Update the FreeRTOS repo to reflect the board that the use chose
     updateBoardChosen(vendor, board, output_dir_name)
     
     callConfigurationScript()
