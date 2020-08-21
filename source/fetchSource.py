@@ -211,7 +211,7 @@ def main():
     output_dir_name = getOutputDirectory()
 
     # Clone the FreeRTOS repository into the users chosen output_dir
-    # cloneFreeRTOSRepository(output_dir_name)
+    cloneFreeRTOSRepository(output_dir_name)
 
     # Update the FreeRTOS repo to reflect the board that the use chose
     updateBoardChosen(vendor, board, output_dir_name)

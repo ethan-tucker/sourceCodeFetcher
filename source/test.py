@@ -20,6 +20,26 @@ def captured_output():
         sys.stdout, sys.stderr = old_out, old_err
 
 
+boards_dict = OrderedDict(
+        [("cypress", ["CY8CKIT_064S0S2_4343W", "CYW943907AEVAL1F",
+                        "CYW954907AEVAL1F"]),
+            ("espressif", ["esp32"]),
+            ("infineon", ["xmc4800_iotkit",
+                            "xmc4800_plus_optiga_trust_x"]),
+            ("marvell", ["mw300_rd"]),
+            ("mediatek", ["mt7697hx-dev-kit"]),
+            ("microchip", ["curiosity_pic32mzef",
+                            "ecc608a_plus_winsim"]),
+            ("nordic", ["nrf52840-dk"]),
+            ("nuvoton", ["numaker_iot_m487_wifi"]),
+            ("nxp", ["lpc54018iotmodule"]),
+            ("pc", ["linux", "windows"]),
+            ("renesas", ["rx65n-rsk"]),
+            ("st", ["stm32l475_discovery"]),
+            ("ti", ["cc3220_launchpad"]),
+            ("xilinx", ["microzed"])])
+
+
 class TestFetchSource(unittest.TestCase):
     @mock.patch('fetchSource.input', create=True)
     # validate that I can enter in incorrect values and then a correct
@@ -35,25 +55,6 @@ class TestFetchSource(unittest.TestCase):
     @mock.patch('fetchSource.input', create=True)
     def test_boardChoiceMenu(self, mocked_input):
         mocked_input.side_effect = ['0', '15', 'e', '2', '0', '5', 'e', '1']
-
-        boards_dict = OrderedDict(
-                [("cypress", ["CY8CKIT_064S0S2_4343W", "CYW943907AEVAL1F",
-                              "CYW954907AEVAL1F"]),
-                    ("espressif", ["esp32"]),
-                    ("infineon", ["xmc4800_iotkit",
-                                  "xmc4800_plus_optiga_trust_x"]),
-                    ("marvell", ["mw300_rd"]),
-                    ("mediatek", ["mt7697hx-dev-kit"]),
-                    ("microchip", ["curiosity_pic32mzef",
-                                   "ecc608a_plus_winsim"]),
-                    ("nordic", ["nrf52840-dk"]),
-                    ("nuvoton", ["numaker_iot_m487_wifi"]),
-                    ("nxp", ["lpc54018iotmodule"]),
-                    ("pc", ["linux", "windows"]),
-                    ("renesas", ["rx65n-rsk"]),
-                    ("st", ["stm32l475_discovery"]),
-                    ("ti", ["cc3220_launchpad"]),
-                    ("xilinx", ["microzed"])])
 
         actual_output_filepath = "testOutputActual/boardChoiceMenu1"
         expected_output_filepath = "testOutputExpected/boardChoiceMenu1"
@@ -173,7 +174,37 @@ class TestFetchSource(unittest.TestCase):
 
         self.assertTrue(filecmp.cmp(expected_board_config_filepath,
                         actual_board_config_filepath))
+                        
 
+    def test_enableLibraries(self):
+
+        # Choose a consistent board so that the test does not depend on the 
+        # current state of the .config file
+        fetchSource.setLibraryDefaults("espressif", "esp32")
+
+        expected_output_filepath = "testOutputExpected/enableLibrariesOutput1"
+        fetchSource.enableLibraries()
+
+        self.assertTrue(filecmp.cmp(expected_output_filepath, ".config"))
+
+    def test_enableLibraries2(self):
+
+        # Choose a consistent board so that the test does not depend on the 
+        # current state of the .config file
+        fetchSource.setLibraryDefaults("nuvoton", "numaker_iot_m487_wifi")
+
+        expected_output_filepath = "testOutputExpected/enableLibrariesOutput2"
+        fetchSource.enableLibraries()
+
+        self.assertTrue(filecmp.cmp(expected_output_filepath, ".config"))
+
+    @mock.patch('fetchSource.input', create=True)
+    def test_getOutputDir(self, mocked_input):
+        testing_input = 'testing'
+        mocked_input.side_effect = [testing_input]
+        output_dir = fetchSource.getOutputDirectory()
+
+        self.assertEqual(testing_input, output_dir)
 
 if __name__ == '__main__':
     unittest.main()
