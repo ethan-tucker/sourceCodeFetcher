@@ -115,11 +115,9 @@ def cloneFreeRTOSRepository(output_dir_name):
 
     # change directories so that the freertos repo is cloned outside the scope
     # of this repository
-    os.chdir("../..")
     subprocess.run(["git", "clone",
                     "https://github.com/ethan-tucker/amazon-freertos.git",
-                    "--recurse-submodules", output_dir_name])
-    os.chdir("sourceFetcher/source")
+                    "--recurse-submodules", output_dir_name], cwd="../..")
 
 
 # updateBoardChosen: Now that the user has chosen a board and cloned the repo
@@ -127,12 +125,9 @@ def cloneFreeRTOSRepository(output_dir_name):
 # user has chosen. This function updates the ".config" and "boardChoice.csv" to
 # indicate the board choice that the user has made.
 def updateBoardChosen(vendor, board, output_dir_name):
-    os.chdir("../../" + output_dir_name +
-             "/amazon-freertos/tools/configuration")
-
     command = ["py", "merge_config.py", "KConfig", ".config"]
 
-    config_files = findAllKConfigFiles(vendor, board)
+    config_files = findAllKConfigFiles(vendor, board, output_dir_name)
     for file in config_files:
         command.append(file)
 
@@ -145,21 +140,25 @@ def updateBoardChosen(vendor, board, output_dir_name):
     # uses this .config file to generate a new KConfig.h file.
     print("\n-----MERGING CONFIGURATIONS FOR YOUR BOARD-----\n")
     sys.stdout.flush()
-    subprocess.run(command)
+    subprocess.run(command, cwd="../../" + output_dir_name +
+                   "/amazon-freertos/tools/configuration")
     print()
 
     # Opening the boardChoice.csv file to store the vendor and board choice the
     # user made. This is how the configure.py script will know which option was
     # chosen.
-    with open("boardChoice.csv", "w") as board_chosen_file:
+    with open("../../" + output_dir_name +
+              "/amazon-freertos/tools/configuration/boardChoice.csv", "w") as \
+              board_chosen_file:
         board_chosen_file.write(vendor + "," + board)
 
 
 # callConfigurationScript: This calls the original configuration script
 # allowing the user to configure the FreeRTOS code as well as provision
 # AWS resources and build and run their demo of choice.
-def callConfigurationScript():
-    subprocess.run(["py", "configure.py"])
+def callConfigurationScript(output_dir_name):
+    subprocess.run(["py", "configure.py"], cwd="../../" + output_dir_name +
+                    "/amazon-freertos/tools/configuration")
 
 
 # findAllKConfigFiles: Globs the boards directory tree for Kconfig files.
@@ -167,13 +166,18 @@ def callConfigurationScript():
 # without the code needing to be changed. It also doesn't break if certain
 # boards do not have all of the configuration files (for example some boards
 # wont have ota_agent_config.h).
-def findAllKConfigFiles(vendor, board):
-    board_properties = ("../../vendors/" + vendor + "/boards/" + board +
-                        "/*Kconfig")
-    library_configs = ("../../vendors/" + vendor + "/boards/" + board +
+def findAllKConfigFiles(vendor, board, output_dir_name):
+    os.chdir("../../" + output_dir_name +
+             "/amazon-freertos/tools/configuration")
+    board_properties = ("../../vendors/" +
+                        vendor + "/boards/" + board + "/*Kconfig")
+    library_configs = ("../../vendors/" +
+                       vendor + "/boards/" + board +
                        "/aws_demos/config_files/*Kconfig")
     KconfigFilenamesList = (glob.glob(board_properties) +
                             glob.glob(library_configs))
+    
+    os.chdir("../../../../sourceFetcher/source")
 
     return KconfigFilenamesList
 
@@ -211,12 +215,12 @@ def main():
     output_dir_name = getOutputDirectory()
 
     # Clone the FreeRTOS repository into the users chosen output_dir
-    cloneFreeRTOSRepository(output_dir_name)
+    # cloneFreeRTOSRepository(output_dir_name)
 
     # Update the FreeRTOS repo to reflect the board that the use chose
     updateBoardChosen(vendor, board, output_dir_name)
 
-    callConfigurationScript()
+    callConfigurationScript(output_dir_name)
 
 
 if __name__ == "__main__":

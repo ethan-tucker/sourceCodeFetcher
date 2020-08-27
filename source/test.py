@@ -9,7 +9,7 @@ from collections import OrderedDict
 import os
 
 
-# When this funciton is called it redirects stdout to a
+# When this function is called it redirects stdout to a
 # variable that can be accessed by calling
 # out.getvalue().strip(). This allows the printed output
 # of the function to be checked
@@ -115,8 +115,6 @@ class TestFetchSource(unittest.TestCase):
     def test_findAllKConfigFiles(self):
         # This test will only pass if the afr_KConfig repo has been cloned
         output_dir_name = "afr_Kconfig"
-        os.chdir("../../" + output_dir_name +
-                 "/amazon-freertos/tools/configuration")
 
         expected_list = ["../../vendors/espressif/boards/esp32\\Kconfig",
                          "../../vendors/espressif/boards/esp32/aws_demos" +
@@ -126,8 +124,8 @@ class TestFetchSource(unittest.TestCase):
                          "../../vendors/espressif/boards/esp32/aws_demos" +
                          "/config_files\\ota_Kconfig"]
 
-        KConfig_list = fetchSource.findAllKConfigFiles("espressif", "esp32")
-        os.chdir("../../../../sourceFetcher/source")
+        KConfig_list = fetchSource.findAllKConfigFiles("espressif", "esp32",
+                                                       output_dir_name)
 
         self.assertEquals(expected_list, KConfig_list)
 
@@ -139,8 +137,6 @@ class TestFetchSource(unittest.TestCase):
     def test_findAllKConfigFiles2(self):
         # This test will only pass if the afr_KConfig repo has been cloned
         output_dir_name = "afr_Kconfig"
-        os.chdir("../../" + output_dir_name +
-                 "/amazon-freertos/tools/configuration")
 
         expected_list = ["../../vendors/nuvoton/boards/numaker_iot_m487_wifi" +
                          "\\Kconfig",
@@ -150,8 +146,8 @@ class TestFetchSource(unittest.TestCase):
                          "/aws_demos/config_files\\mqtt_Kconfig"]
 
         KConfig_list = fetchSource.findAllKConfigFiles("nuvoton",
-                                                       "numaker_iot_m487_wifi")
-        os.chdir("../../../../sourceFetcher/source")
+                                                       "numaker_iot_m487_wifi",
+                                                       output_dir_name)
 
         self.assertEquals(expected_list, KConfig_list)
 
@@ -161,13 +157,11 @@ class TestFetchSource(unittest.TestCase):
     def test_findAllKConfigFiles3(self):
         # This test will only pass if the afr_KConfig repo has been cloned
         output_dir_name = "afr_Kconfig"
-        os.chdir("../../" + output_dir_name +
-                 "/amazon-freertos/tools/configuration")
 
         expected_list = []
 
-        KConfig_list = fetchSource.findAllKConfigFiles("vendor", "board")
-        os.chdir("../../../../sourceFetcher/source")
+        KConfig_list = fetchSource.findAllKConfigFiles("vendor", "board",
+                                                       output_dir_name)
 
         self.assertEquals(expected_list, KConfig_list)
 
@@ -176,7 +170,6 @@ class TestFetchSource(unittest.TestCase):
     # "boardChoice.csv" and the ".config" file.
     def test_updatedBoardChosen(self):
         fetchSource.updateBoardChosen("espressif", "esp32", "afr_Kconfig")
-        os.chdir("../../../../sourceFetcher/source")
         expected_board_choice_filepath = "testOutputExpected/boardChoice1"
         expected_board_config_filepath = "testOutputExpected/updateBoardChosen"
 
@@ -196,7 +189,6 @@ class TestFetchSource(unittest.TestCase):
     def test_updatedBoardChosen2(self):
         fetchSource.updateBoardChosen("nuvoton", "numaker_iot_m487_wifi",
                                       "afr_Kconfig")
-        os.chdir("../../../../sourceFetcher/source")
         expected_board_choice_filepath = "testOutputExpected/boardChoice2"
         expected_board_config_filepath = ("testOutputExpected/" +
                                           "updateBoardChosen2")
