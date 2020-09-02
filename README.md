@@ -32,7 +32,10 @@ the set of libraries they want to have enabled the user should save and
 exit the GUI.
 3. The user will be prompted to enter the name of the directory they want
 the code to be clone into.
-4. The code will be cloned in the directory named by the user.
+4. The code will be cloned in the directory named by the user. The code is
+pulled from the this repo: https://github.com/ethan-tucker/amazon-freertos/tree/master.
+The current configuration script lives in the EthanDev branch.
 5. After the code is cloned, the FreeRTOS repository will be slightly
 modified to represent the board chosen by the user.
-6. The configuration script will then be run.
+6. The configuration script will then be run. This script can be viewed here:
+https://github.com/ethan-tucker/amazon-freertos/blob/EthanDev/tools/configuration/configure.py

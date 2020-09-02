@@ -119,6 +119,11 @@ def cloneFreeRTOSRepository(output_dir_name):
                     "https://github.com/ethan-tucker/amazon-freertos.git",
                     "--recurse-submodules", output_dir_name], cwd="../..")
 
+    # until the code is pulled into the master branch it only exists in the
+    # EthanDev branch. So the user must checkout into that branch.
+    repo_directory = "../../" + output_dir_name
+    subprocess.run(["git", "checkout", "EthanDev"], cwd=repo_directory)
+
 
 # updateBoardChosen: Now that the user has chosen a board and cloned the repo
 # the repository must be modified slightly to represent the board that the
@@ -141,14 +146,14 @@ def updateBoardChosen(vendor, board, output_dir_name):
     print("\n-----MERGING CONFIGURATIONS FOR YOUR BOARD-----\n")
     sys.stdout.flush()
     subprocess.run(command, cwd="../../" + output_dir_name +
-                   "/amazon-freertos/tools/configuration")
+                   "/tools/configuration")
     print()
 
     # Opening the boardChoice.csv file to store the vendor and board choice the
     # user made. This is how the configure.py script will know which option was
     # chosen.
     with open("../../" + output_dir_name +
-              "/amazon-freertos/tools/configuration/boardChoice.csv", "w") as \
+              "/tools/configuration/boardChoice.csv", "w") as \
               board_chosen_file:
         board_chosen_file.write(vendor + "," + board)
 
@@ -158,7 +163,7 @@ def updateBoardChosen(vendor, board, output_dir_name):
 # AWS resources and build and run their demo of choice.
 def callConfigurationScript(output_dir_name):
     subprocess.run(["py", "configure.py"], cwd="../../" + output_dir_name +
-                    "/amazon-freertos/tools/configuration")
+                    "/tools/configuration")
 
 
 # findAllKConfigFiles: Globs the boards directory tree for Kconfig files.
@@ -168,7 +173,7 @@ def callConfigurationScript(output_dir_name):
 # wont have ota_agent_config.h).
 def findAllKConfigFiles(vendor, board, output_dir_name):
     os.chdir("../../" + output_dir_name +
-             "/amazon-freertos/tools/configuration")
+             "/tools/configuration")
     board_properties = ("../../vendors/" +
                         vendor + "/boards/" + board + "/*Kconfig")
     library_configs = ("../../vendors/" +
@@ -177,7 +182,7 @@ def findAllKConfigFiles(vendor, board, output_dir_name):
     KconfigFilenamesList = (glob.glob(board_properties) +
                             glob.glob(library_configs))
     
-    os.chdir("../../../../sourceFetcher/source")
+    os.chdir("../../../sourceFetcher/source")
 
     return KconfigFilenamesList
 
