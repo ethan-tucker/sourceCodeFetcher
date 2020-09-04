@@ -86,7 +86,7 @@ def boardChoiceMenu(boards_dict):
 def setLibraryDefaults(vendor_name, board):
     board_default_properties = ("../vendors/" + vendor_name + "/" + board +
                                 "/KConfig")
-    subprocess.run(["py", "merge_config.py", "KConfig", ".config",
+    subprocess.run(["python3", "merge_config.py", "KConfig", ".config",
                     board_default_properties])
 
 
@@ -130,7 +130,7 @@ def cloneFreeRTOSRepository(output_dir_name):
 # user has chosen. This function updates the ".config" and "boardChoice.csv" to
 # indicate the board choice that the user has made.
 def updateBoardChosen(vendor, board, output_dir_name):
-    command = ["py", "merge_config.py", "KConfig", ".config"]
+    command = ["python3", "merge_config.py", "KConfig", ".config"]
 
     config_files = findAllKConfigFiles(vendor, board, output_dir_name)
     for file in config_files:
@@ -162,7 +162,7 @@ def updateBoardChosen(vendor, board, output_dir_name):
 # allowing the user to configure the FreeRTOS code as well as provision
 # AWS resources and build and run their demo of choice.
 def callConfigurationScript(output_dir_name):
-    subprocess.run(["py", "configure.py"], cwd="../../" + output_dir_name +
+    subprocess.run(["python3", "configure.py"], cwd="../../" + output_dir_name +
                     "/tools/configuration")
 
 
